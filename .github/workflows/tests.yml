@@ -5,6 +5,8 @@ on:
     branches:
       - "**"  # run on every branch
   pull_request:
+    branches:
+      - "**"  # run on every branch
 
 jobs:
   test:
