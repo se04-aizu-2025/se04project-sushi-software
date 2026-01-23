@@ -19,6 +19,9 @@ Python
 ## Team Project
 Developed as part of an engineering topic on sorting algorithms.
 
+## Final Presentation
+https://docs.google.com/presentation/d/1Pa5ZpSGh2sgGZ1dzgCN4HNrLC3H0h9CTBRS7s25j1UQ/edit
+
 ## Development Setup
 - Requires Python 3.13+ and [uv](https://docs.astral.sh/uv/); install uv via the official docs if you don't have it.
 - Run `uv sync` to create the virtual environment and install dependencies in one step.
