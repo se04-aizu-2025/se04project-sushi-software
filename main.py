@@ -1,5 +1,8 @@
+from visualizer import main as visualizer_main
+
+
 def main():
-    print("Hello from se04project-sushi-software!")
+    visualizer_main()
 
 
 if __name__ == "__main__":
