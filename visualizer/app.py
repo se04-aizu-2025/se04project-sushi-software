@@ -2,17 +2,35 @@
 
 from __future__ import annotations
 
+import inspect
 import random
 import tkinter as tk
 from tkinter import ttk
 from typing import Dict, List, Type
 
+import sorters
 from common.step import SortStep, StepType
-from sorters import BubbleSort, MergeSort, SelectionSort
 from sorters.base import Sorter
 
 from .canvas_renderer import CanvasRenderer
 from .controller import AnimationState, SortingController
+
+
+def discover_sorters() -> Dict[str, Type[Sorter]]:
+    """Automatically discover all Sorter subclasses in the sorters module."""
+    discovered: Dict[str, Type[Sorter]] = {}
+
+    for name, obj in inspect.getmembers(sorters):
+        if (
+            inspect.isclass(obj)
+            and issubclass(obj, Sorter)
+            and obj is not Sorter
+        ):
+            # Create display name: "bubble" -> "Bubble Sort"
+            display_name = obj.name.replace("_", " ").title() + " Sort"
+            discovered[display_name] = obj
+
+    return discovered
 
 
 class SortingVisualizerApp:
@@ -35,12 +53,8 @@ class SortingVisualizerApp:
         self.root.geometry("900x600")
         self.root.minsize(700, 500)
 
-        # Available sorters (using existing sorters directly)
-        self._sorters: Dict[str, Type[Sorter]] = {
-            "Bubble Sort": BubbleSort,
-            "Selection Sort": SelectionSort,
-            "Merge Sort": MergeSort,
-        }
+        # Auto-discover available sorters
+        self._sorters = discover_sorters()
 
         # Current data
         self._data: List[int] = []
@@ -84,11 +98,13 @@ class SortingVisualizerApp:
 
         # Algorithm selection
         ttk.Label(control_frame, text="Algorithm:").pack(side=tk.LEFT, padx=(0, 5))
-        self.algorithm_var = tk.StringVar(value="Bubble Sort")
+        sorter_names = sorted(self._sorters.keys())
+        default_sorter = sorter_names[0] if sorter_names else ""
+        self.algorithm_var = tk.StringVar(value=default_sorter)
         algorithm_combo = ttk.Combobox(
             control_frame,
             textvariable=self.algorithm_var,
-            values=list(self._sorters.keys()),
+            values=sorter_names,
             state="readonly",
             width=15,
         )
@@ -208,7 +224,10 @@ class SortingVisualizerApp:
 
     def _setup_sorter(self) -> None:
         """Setup the sorter with current data."""
-        sorter_class = self._sorters.get(self.algorithm_var.get(), BubbleSort)
+        sorter_class = self._sorters.get(self.algorithm_var.get())
+        if sorter_class is None:
+            # Fallback to first available sorter
+            sorter_class = next(iter(self._sorters.values()))
         sorter = sorter_class()
         self.controller.setup(sorter, self._data.copy(), self.root)
         self.controller.set_speed(self.speed_var.get())
